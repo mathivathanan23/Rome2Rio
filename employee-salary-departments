@@ -1,6 +1,14 @@
-This code I wrote a showcase my ETL pipelines for reporting at my previous work (a modified version of the problem) 
+This code I wrote for to create ETL pipelines for structured reporting at my previous work (a modified version of the problem) 
 This code first takes on csv formatted data >> extracting that format >> transform to normalise salary such as filtering high salaries by department 
 This code finally load the data into structure dictonary for reporting purpose 
+
+#sample csv formatted data 
+
+Employee,Department,Salary
+Mathi,Engineering,$60,000
+Bob,E-commerce,$45,000
+Claire,Engineering,$80,000
+
 
 
 # Example use of the code
@@ -13,6 +21,8 @@ structured_data = etl.load()  # Load into structured dictionary
 print("Department Salary Totals:", department_totals)
 print("Structured Data:", structured_data)
 
+#Sample Output 
+
 
 {
     "Engineering": [
@@ -22,49 +32,50 @@ print("Structured Data:", structured_data)
 }
 
 
-import csv
-from collections import defaultdict
+#Actual Code
 
-class ETLPipeline: #creating a csv pipeline to read the data
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.data = []
+import csv  
+from collections import defaultdict  
 
-    def extract(self):
-        with open(self.file_path, mode='r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            self.data = list(reader)
+class ETLPipeline:  #creating ETL pipelines 
+    def __init__(self, file_path):  
+        self.file_path = file_path  
+        self.data = []  
 
-    def transform(self):
-        """aggregates department total"""
-        transformed_data = []
-        department_salaries = defaultdict(float)  # Dictionary to store department-wise salary totals
-        
-        for row in self.data:
-            # salary to float format
-            salary = float(row["Salary"].replace("$", "").replace(",", "").strip())
-            
-            # Filter employees earning above $50,000
-            if salary >= 50000:
-                transformed_data.append({
-                    "Employee": row["Employee"],
-                    "Department": row["Department"],
-                    "Salary": salary
-                })
-                # Aggregate department salaries
-                department_salaries[row["Department"]] += salary
+    def extract(self):   #Extracting the data for the format 
+        with open(self.file_path, mode='r', encoding='utf-8') as file:  
+            reader = csv.DictReader(file)  
+            self.data = list(reader)  
 
-        self.data = transformed_data
-        return department_salaries  # Return department-wise total salaries
+""" BODY """ 
 
-    def load(self):
-        """Stores transformed data in a structured dictionary format for easy retrieval."""
-        structured_data = defaultdict(list)
+    def transform(self):  
+        """Calculates total salary per department and filters employees with salaries above $50,000."""  
+        transformed_data = []  
+        department_salaries = defaultdict(float)  
 
-        for row in self.data:
-            structured_data[row["Department"]].append({
-                "Employee": row["Employee"],
-                "Salary": row["Salary"]
-            })
+        for row in self.data:  
+            salary = float(row["Salary"].replace("$", "").replace(",", "").strip())  
 
-        return structured_data
+            if salary >= 50000:  
+                transformed_data.append({  
+                    "Employee": row["Employee"],  
+                    "Department": row["Department"],  
+                    "Salary": salary  
+                })  
+                department_salaries[row["Department"]] += salary  
+
+        self.data = transformed_data  
+        return department_salaries  
+
+    def load(self):  
+        """Organises transformed data into a structured dictionary grouped by department."""  
+        structured_data = defaultdict(list)  
+
+        for row in self.data:  
+            structured_data[row["Department"]].append({  
+                "Employee": row["Employee"],  
+                "Salary": row["Salary"]  
+            })  
+
+        return structured_data  
