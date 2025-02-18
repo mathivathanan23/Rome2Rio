@@ -1,4 +1,4 @@
-This code I wrote a showcase my ETL pipelines for reporting at my previous work (a little modified) 
+This code I wrote a showcase my ETL pipelines for reporting at my previous work (a modified version of the problem) 
 This code first takes on csv formatted data >> extracting that format >> transform to normalise salary such as filtering high salaries by department 
 This code finally load the data into structure dictonary for reporting purpose 
 
