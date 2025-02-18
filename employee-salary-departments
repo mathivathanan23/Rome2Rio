@@ -1,0 +1,70 @@
+This code I wrote a showcase my ETL pipelines for reporting at my previous work (a little modified) 
+This code first takes on csv formatted data >> extracting that format >> transform to normalise salary such as filtering high salaries by department 
+This code finally load the data into structure dictonary for reporting purpose 
+
+
+# Example use of the code
+
+etl = ETLPipeline("employee_salary.csv")
+etl.extract()  # Extract data from CSV
+department_totals = etl.transform()  # Transform and get department-wise salary totals
+structured_data = etl.load()  # Load into structured dictionary
+
+print("Department Salary Totals:", department_totals)
+print("Structured Data:", structured_data)
+
+
+{
+    "Engineering": [
+        {"Employee": "Mathi", "Salary": 60000.0},
+        {"Employee": "Claire", "Salary": 80000.0}
+    ]
+}
+
+
+import csv
+from collections import defaultdict
+
+class ETLPipeline: #creating a csv pipeline to read the data
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.data = []
+
+    def extract(self):
+        with open(self.file_path, mode='r', encoding='utf-8') as file:
+            reader = csv.DictReader(file)
+            self.data = list(reader)
+
+    def transform(self):
+        """aggregates department total"""
+        transformed_data = []
+        department_salaries = defaultdict(float)  # Dictionary to store department-wise salary totals
+        
+        for row in self.data:
+            # salary to float format
+            salary = float(row["Salary"].replace("$", "").replace(",", "").strip())
+            
+            # Filter employees earning above $50,000
+            if salary >= 50000:
+                transformed_data.append({
+                    "Employee": row["Employee"],
+                    "Department": row["Department"],
+                    "Salary": salary
+                })
+                # Aggregate department salaries
+                department_salaries[row["Department"]] += salary
+
+        self.data = transformed_data
+        return department_salaries  # Return department-wise total salaries
+
+    def load(self):
+        """Stores transformed data in a structured dictionary format for easy retrieval."""
+        structured_data = defaultdict(list)
+
+        for row in self.data:
+            structured_data[row["Department"]].append({
+                "Employee": row["Employee"],
+                "Salary": row["Salary"]
+            })
+
+        return structured_data
